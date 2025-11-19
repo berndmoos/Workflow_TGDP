@@ -15,7 +15,7 @@ The code takes care of:
 - Phonetic annotation (using the G2P web service from BAS Munich)
 - Speech rate annotation
 
-  ## Indexing
+## Indexing
   - Lucene index for MTAS (for query in ZuMult)
   - Indexing of the COMA file (for quicker access in ZuMult)
   - Stats for the COMA file (for quicker access in ZuMult)
