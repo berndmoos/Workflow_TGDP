@@ -6,7 +6,6 @@ package de.linguisticbits.workflow.indexing;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -15,22 +14,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import org.exmaralda.coma.root.ComaDocument;
 import org.exmaralda.common.jdomutilities.IOUtilities;
 import org.exmaralda.exakt.utilities.FileIO;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import org.zumult.indexing.search.SearchIndexer;
-import org.zumult.io.IOHelper;
-import org.zumult.io.ISOTEINamespaceContext;
 
 
 
@@ -38,7 +28,7 @@ import org.zumult.io.ISOTEINamespaceContext;
  *
  * @author bernd
  */
-public class FindMTASIndexingProblems {
+public class FixMTASIndexingProblems {
 
     
     static String pathToComa = "D:\\ZUMULT\\TGDP\\TGDP.coma";
@@ -60,13 +50,13 @@ public class FindMTASIndexingProblems {
         
         try {
             //new IndexForMTAS().buildIndex();
-            new FindMTASIndexingProblems().findIndexingProblems();
+            new FixMTASIndexingProblems().findIndexingProblems();
         } catch (IOException | JDOMException | SAXException | ParserConfigurationException | XPathExpressionException | TransformerException ex) {
-            Logger.getLogger(FindMTASIndexingProblems.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FixMTASIndexingProblems.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public FindMTASIndexingProblems() throws IOException, JDOMException {
+    public FixMTASIndexingProblems() throws IOException, JDOMException {
         org.jdom.Document xmlDocument = FileIO.readDocumentFromLocalFile(pathToComa);
         org.jdom.Element rootElement = xmlDocument.detachRootElement();
         comaDocument = new ComaDocument(rootElement);

@@ -6,8 +6,6 @@ package de.linguisticbits.workflow.indexing;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,7 +34,7 @@ public class IndexForCOMA {
         if (args.length==1){
             pathToComa = args[0];
         } else if (args.length!=0){
-            System.out.println("Usage: IndexForCOMA pathToComa");
+            System.out.println("Usage: IndexForCOMA path/to/Coma.coma");
             System.exit(0);            
         }
         
@@ -47,8 +45,8 @@ public class IndexForCOMA {
         }
     }
     
-    private Map<String, String> id2Corpus = new HashMap<>();
-    private Map<String, String> id2parentID = new HashMap<>();
+    //private Map<String, String> id2Corpus = new HashMap<>();
+    //private Map<String, String> id2parentID = new HashMap<>();
     static String pathToComa = "D:\\ZUMULT\\TGDP\\TGDP.coma";
     
 
@@ -59,23 +57,23 @@ public class IndexForCOMA {
         File comaFile = new File(pathToComa);
         Element root = IOHelper.readDocument(comaFile).getDocumentElement();
         NodeList allIDElements = (NodeList) xPath2.evaluate(xp, root, XPathConstants.NODESET);
-        System.out.println("Processing " + allIDElements.getLength() + " elements with ID. ");
+        System.out.println("[IndexForCOMA] Processing " + allIDElements.getLength() + " elements with ID. ");
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<coma-index>");
         for (int i=0; i<allIDElements.getLength(); i++){
             Element idElement = ((Element)(allIDElements.item(i)));
             String thisID = idElement.getAttribute("Id");
-            id2Corpus.put(thisID, corpusID);
+            //id2Corpus.put(thisID, corpusID);
             sb.append("<index id=\"").append(thisID).append("\" corpus=\"").append(corpusID).append("\"");
             Element parentElement = (Element) (Node) xPath2.evaluate("ancestor::*[@Id][1]", idElement, XPathConstants.NODE);
             if (parentElement!=null){
                 String parentID = parentElement.getAttribute("Id");
-                id2parentID.put(thisID, parentID);
+                //id2parentID.put(thisID, parentID);
                 sb.append(" parent=\"").append(parentID).append("\"");
             }
             sb.append("/>");
             if (i%1000==0){
-                System.out.println("[" + i + "/" + allIDElements.getLength() + "]");
+                System.out.println("[IndexForCOMA] [" + i + "/" + allIDElements.getLength() + "]");
             }
         } 
         sb.append("</coma-index>");
@@ -85,7 +83,7 @@ public class IndexForCOMA {
         Document indexDocument = IOHelper.DocumentFromText(sb.toString());
         File comaIndexFile = new File(comaFile.getParentFile(), comaFile.getName().substring(0, comaFile.getName().indexOf(".")) + ".comaindex");
         IOHelper.writeDocument(indexDocument, comaIndexFile);
-        System.out.println("Index written to " + comaIndexFile.getAbsolutePath());
+        System.out.println("[IndexForCOMA] COMA ID Index written to " + comaIndexFile.getAbsolutePath());
         
     }
     

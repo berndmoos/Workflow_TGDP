@@ -38,8 +38,8 @@ public class ConvertAndAnnotate {
                 System.exit(0);
             }
             
-            if (args.length!=2){
-                System.out.println("Usage: ConvertAndAnnotate /path/to/comafile.coma /path/to/configuration.xml");
+            if (args.length!=1){
+                System.out.println("Usage: ConvertAndAnnotate /path/to/comafile.coma");
                 System.exit(0);
             }
             
