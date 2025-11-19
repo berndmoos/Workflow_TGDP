@@ -48,7 +48,9 @@ Setting a ZuMult configuration is done by
 - Specifying the path to that file in an environment variable `ZUMULT_CONFIG_PATH`
 
 The TreeTagger binary must be downloaded from https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/.
+
 The two TreeTagger parameter files are part of this repository: [tagger package](src/main/java/de/linguisticbits/workflow/tagger/)
+
 The three phonetic lexicons are also part of this repository: [normalizer package](src/main/java/de/linguisticbits/workflow/normalizer/)
 
 In the batch file, you need to adapt the variables `WORKFLOW_JAR` and `LIB_DIRECTORY`
