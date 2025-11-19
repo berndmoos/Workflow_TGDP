@@ -24,7 +24,7 @@ The code takes care of:
 
 This Windows batch file (or a Linux equivalent) bundles all commands:
 
-src/main/java/de/linguisticbits/workflow/ConvertAnnotateIndex.bat
+[ConvertAnnotateIndex](src/main/java/de/linguisticbits/workflow/ConvertAnnotateIndex.bat)
 
 Additionally, a ZuMult configuration file has to be set on the system with suitable values as follows:
 
@@ -48,8 +48,21 @@ Setting a ZuMult configuration is done by
 - Specifying the path to that file in an environment variable `ZUMULT_CONFIG_PATH`
 
 The TreeTagger binary must be downloaded from https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/.
-The two TreeTagger parameter files are part of this repository: src/main/java/de/linguisticbits/workflow/tagger
-The three phonetic lexicons are also part of this repository: src/main/java/de/linguisticbits/workflow/normalizer
+The two TreeTagger parameter files are part of this repository: [tagger package](src/main/java/de/linguisticbits/workflow/tagger)
+The three phonetic lexicons are also part of this repository: [normalizer package](src/main/java/de/linguisticbits/workflow/normalizer)
+
+In the batch file, you need to adapt the variables `WORKFLOW_JAR` and `LIB_DIRECTORY`
+
+When calling the batch file, you need to specify four parameters:
+
+- The path to the COMA file ([...]/TGDP.coma)
+- The path to the MTAS configuration file - part of this repository: [MTAS config](src/main/java/de/linguisticbits/workflow/indexing/tgdp_mtas_config_SB.xml)
+- The path of the directory to which the MTAS/Lucene index will be written
+- The name of the MTAS/Lucene index (SB_TGDP)
+
+  
+  
+
 
 
  
