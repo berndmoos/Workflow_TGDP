@@ -44,7 +44,7 @@ public class FixMTASIndexingProblems {
         if (args.length == 1){
             pathToComa = args[0];            
         } else if (args.length > 0){
-            System.out.println("Usage: FindMTASIndexingProblems pathToComa");
+            System.out.println("Usage: FixMTASIndexingProblems pathToComa");
             System.exit(0);
         }
         
@@ -70,7 +70,7 @@ public class FixMTASIndexingProblems {
         File comaFile = new File(pathToComa);
         Path topLevelPath = comaFile.getParentFile().toPath();
         List transcriptions = org.jdom.xpath.XPath.selectNodes(comaDocument, "//Transcription");
-        System.out.println("[FindMTASIndexingProblems] " + transcriptions.size() + " trancripts found in " + comaFile.getAbsolutePath());
+        System.out.println("[FixMTASIndexingProblems] " + transcriptions.size() + " trancripts found in " + comaFile.getAbsolutePath());
         int count = 0;
         for (Object o : transcriptions){
             boolean changed = false;
@@ -80,7 +80,7 @@ public class FixMTASIndexingProblems {
             String nsLink = transcriptionElement.getChildText("NSLink");
             Path resolvedPath = topLevelPath.resolve(nsLink);
             File xmlFile = resolvedPath.toFile();
-            System.out.println("[FindMTASIndexingProblems] Processing " + count + " of " + transcriptions.size() + ": " + transcriptID + " / " + xmlFile.getAbsolutePath());
+            System.out.println("[FixMTASIndexingProblems] Processing " + count + " of " + transcriptions.size() + ": " + transcriptID + " / " + xmlFile.getAbsolutePath());
             org.jdom.Document transcriptionDocument = FileIO.readDocumentFromLocalFile(xmlFile);
             
             org.jdom.xpath.XPath xp = org.jdom.xpath.XPath.newInstance("//*[@from]");
@@ -110,7 +110,7 @@ public class FixMTASIndexingProblems {
                 }            
             }
             if (changed){
-                System.out.println("[FindMTASIndexingProblems] " + xmlFile.getName() + " changed.");
+                System.out.println("[FixMTASIndexingProblems] " + xmlFile.getName() + " changed.");
                 FileIO.writeDocumentToLocalFile(xmlFile, transcriptionDocument);
             }
         }
