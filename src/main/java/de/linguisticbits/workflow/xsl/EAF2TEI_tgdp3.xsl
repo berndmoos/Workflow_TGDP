@@ -58,5 +58,4 @@
     <xsl:template match="tei:pc[text()=')' and preceding-sibling::*[3][self::tei:pc and text()='(']]"/>
     <xsl:template match="tei:w[preceding-sibling::*[2][self::tei:pc and text()='('] and following-sibling::*[1][self::tei:pc and text()=')']]"/>
     
-
 </xsl:stylesheet>

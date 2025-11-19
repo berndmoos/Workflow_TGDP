@@ -19,6 +19,7 @@ import javax.xml.transform.TransformerException;
 import org.exmaralda.common.jdomutilities.IOUtilities;
 import org.exmaralda.exakt.utilities.FileIO;
 import org.exmaralda.orthonormal.lexicon.LexiconException;
+import org.exmaralda.partitureditor.annotation.UDPOSMapping;
 import org.exmaralda.partitureditor.jexmaralda.convert.StylesheetFactory;
 import org.exmaralda.tagging.SextantISOTEIIntegrator;
 import org.exmaralda.tagging.TreeTaggableISOTEITranscription;
@@ -46,9 +47,16 @@ public class EAFAnnotator {
     static Map<String, String> germanMap;
     static Map<String, String> otherMap;
     
+    static UDPOSMapping englishUDMapping;
+    static UDPOSMapping germanUDMapping;
+    
+    Namespace teiNs = Namespace.getNamespace("tei", "http://www.tei-c.org/ns/1.0");
+    
+    
+    
     static {
         try {
-            System.out.println("Static initialisation of lexicon maps for phonetic annotation");
+            System.out.println("[EAFAnnotator] Static initialisation of lexicon maps for phonetic annotation");
             File germanFile = new File(Configuration.getConfigurationVariable("phonetic-lexicon-german"));
             File englishFile = new File(Configuration.getConfigurationVariable("phonetic-lexicon-english"));
             File otherFile = new File(Configuration.getConfigurationVariable("phonetic-lexicon-other"));
@@ -60,7 +68,13 @@ public class EAFAnnotator {
             englishMap = readMap(englishLexiconDoc);
             germanMap = readMap(germanLexiconDoc);
             otherMap = readMap(otherLexiconDoc);
-            System.out.println("Lexicon maps read");
+            System.out.println("[EAFAnnotator] Lexicon maps read");
+            
+            System.out.println("[EAFAnnotator] Static initialisation of UD mappings");
+            englishUDMapping = new UDPOSMapping("/org/exmaralda/partitureditor/annotation/PENN_TreeTagger.xml");
+            germanUDMapping = new UDPOSMapping(UDPOSMapping.TagSet.STTS_2_0);
+            System.out.println("[EAFAnnotator] UD mappings read");
+            
         } catch (JDOMException | IOException ex) {
             Logger.getLogger(EAFAnnotator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -91,12 +105,21 @@ public class EAFAnnotator {
     
     public void convertAndAnnotate(){
         try {
+            System.out.println("[EAFAnnotator] Converting to ISO/TEI");
             convert();
+            System.out.println("[EAFAnnotator] Normalizing ISO/TEI");
             new ISOTEINormalizer(isoTeiDoc).normalize();
+            System.out.println("[EAFAnnotator] Lemmatizing POS/Tagging for German");
             lemmatizePosDe();
+            System.out.println("[EAFAnnotator] Lemmatizing POS/Tagging for English");
             lemmatizePosEn();
+            System.out.println("[EAFAnnotator] Merging lemmatization");
             mergeLemmas();
+            System.out.println("[EAFAnnotator] Mapping POS tags to Universal Dependencies");
+            mapUDPos();
+            System.out.println("[EAFAnnotator] Phonetic annotation");
             annotatePhonetic();
+            System.out.println("[EAFAnnotator] Speech rate annotation");
             annotateSpeechRate();
         } catch (SAXException | ParserConfigurationException | IOException | TransformerException | JDOMException | LexiconException ex) {
             Logger.getLogger(EAFAnnotator.class.getName()).log(Level.SEVERE, null, ex);
@@ -120,6 +143,11 @@ public class EAFAnnotator {
     String XSL4 = "/org/exmaralda/tei/xml/normalize.xsl";
     // XSL stylesheet for turning span annotations into attribute annotations (part of EXMARaLDA package)
     String XSL5 = "/org/exmaralda/tei/xml/spans2attributes.xsl";
+    // This is an addition from 17-11-2025: translations of utterances ending with incidents
+    // would have @to values with an invalid IDREF
+    // this stylesheet fixes that
+    String XSL6 = "/de/linguisticbits/workflow/xsl/EAF2TEI_tgdp4.xsl";
+    
     
     private void convert() throws SAXException, ParserConfigurationException, IOException, TransformerException, JDOMException{
         StylesheetFactory ssf = new StylesheetFactory(true);
@@ -136,8 +164,9 @@ public class EAFAnnotator {
         String s3 = ssf.applyInternalStylesheetToString(XSL3, s2);
         String s4 = ssf.applyInternalStylesheetToString(XSL4, s3);
         String s5 = ssf.applyInternalStylesheetToString(XSL5, s4);
+        String s6 = ssf.applyInternalStylesheetToString(XSL6, s5);
 
-        isoTeiDoc = IOUtilities.readDocumentFromString(s5);        
+        isoTeiDoc = IOUtilities.readDocumentFromString(s6);        
     }
     
     /**************************************************************/
@@ -275,13 +304,6 @@ public class EAFAnnotator {
             pc.setAttribute("pos", "$");
             pc.setAttribute("lemma", pc.getText());
         }
-
-        // get rid of all existing attributes for pos and lemma
-        List l3 = XPath.selectNodes(isoTeiDoc, "//@lemma-en|//@pos-en|//@p-pos");
-        for (Object o : l3){
-            Attribute a = (Attribute)o;
-            a.detach();
-        }
     }
     
     /**************************************************************/
@@ -399,8 +421,69 @@ public class EAFAnnotator {
         }
         
         
+    }
+    
+    public void mapUDPos() throws IOException, JDOMException {
+        System.out.println("=================================");
+        //Document trDoc = FileIO.readDocumentFromLocalFile(isoTeiFile);
+        Document trDoc = this.isoTeiDoc;
+        XPath xp = XPath.newInstance("//tei:annotationBlock[descendant::tei:w]");
+        xp.addNamespace(teiNs);
+        List l = xp.selectNodes(trDoc);
+
+        for (Object o : l){
+            Element ab = (Element)o;
+            Element spanGrp = new Element("spanGrp", teiNs);
+            spanGrp.setAttribute("type", "udpos");
+            ab.addContent(spanGrp);
+            
+            XPath xp2 = XPath.newInstance("descendant::tei:w");
+            xp2.addNamespace(teiNs);
+            List l2 = xp2.selectNodes(ab);
+            for (Object o2 : l2){
+                Element w = (Element)o2;
+                String lang = w.getAttributeValue("lang", Namespace.XML_NAMESPACE);
+                Element span = new Element("span", teiNs);
+                span.setAttribute("from", w.getAttributeValue("id", Namespace.XML_NAMESPACE));
+                span.setAttribute("to", w.getAttributeValue("id", Namespace.XML_NAMESPACE));
+                spanGrp.addContent(span);
+                if ("eng".equals(lang)){
+                    String enPOS = w.getAttributeValue("pos-en");
+                    String allPOS = "";
+                    if (enPOS!=null){
+                        String[] enPOSTokens = enPOS.split(" ");
+                        for (String enPOSToken : enPOSTokens){
+                            String udPOS = englishUDMapping.get(enPOSToken);
+                            allPOS+=udPOS + " ";
+                        }
+                    }
+                    span.setText(allPOS.trim());
+                    //System.out.println("********* " + enPOS + " --> " + allPOS);
+                } else {
+                    String pos = w.getAttributeValue("pos");
+                    String allPOS = "";
+                    if (pos!=null){
+                        String[] posTokens = pos.split(" ");
+                        for (String posToken : posTokens){
+                            String udPOS = germanUDMapping.get(posToken);
+                            allPOS+=udPOS + " ";
+                        }
+                    }
+                    span.setText(allPOS.trim());
+                    //System.out.println("********* " + pos + " --> " + allPOS);
+                }
+            }
+        }
+        
+        // get rid of all existing attributes for pos and lemma
+        List l3 = XPath.selectNodes(isoTeiDoc, "//@lemma-en|//@pos-en|//@p-pos");
+        for (Object o : l3){
+            Attribute a = (Attribute)o;
+            a.detach();
+        }
         
     }
+    
 
 
     

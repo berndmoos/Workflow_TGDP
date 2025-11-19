@@ -170,6 +170,7 @@
                             <xsl:non-matching-substring>
                                 <xsl:analyze-string select="." regex=".">
                                    <xsl:matching-substring>
+                                       <xsl:variable name="POSITION2" select="position()"/>
                                        <tei:pc>
                                         <xsl:variable name="DUMMY_NODE">
                                                     <node/>
@@ -178,6 +179,8 @@
                                                <xsl:value-of select="$THIS_ID"/>
                                                <xsl:text>_p</xsl:text>
                                                <xsl:value-of select="$POSITION1"/>
+                                               <xsl:text>_</xsl:text>
+                                               <xsl:value-of select="$POSITION2"/>
                                                <xsl:text>_</xsl:text>
                                                <xsl:value-of select="generate-id($DUMMY_NODE//node)"/> 
                                         </xsl:attribute>
