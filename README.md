@@ -19,5 +19,38 @@ The code takes care of:
   - Lucene index for MTAS (for query in ZuMult)
   - Indexing of the COMA file (for quicker access in ZuMult)
   - Stats for the COMA file (for quicker access in ZuMult)
+
+## Usage
+
+This Windows batch file (or a Linux equivalent) bundles all commands:
+
+src/main/java/de/linguisticbits/workflow/ConvertAnnotateIndex.bat
+
+Additionally, a ZuMult configuration file has to be set on the system with suitable values as follows:
+
+```
+<configuration>
+  <backend classPath="org.zumult.backend.implementations.COMAFileSystem">              
+    <tree-tagger-directory>C:\Users\bernd\Dropbox\TreeTagger</tree-tagger-directory>         
+    <tree-tagger-parameter-file-german>C:\linguisticbits_nb\2021-04-16_ParameterFile_ORIGINAL_ALL_FINAL.par</tree-tagger-parameter-file-german>       
+    <tree-tagger-parameter-file-english>C:\linguisticbits_nb\english.par</tree-tagger-parameter-file-english>
+
+    <!-- Phonetic lexicons, see section 1.9 -->
+    <phonetic-lexicon-german>C:\linguisticbits_nb\Lexicon_German.xml</phonetic-lexicon-german>        
+    <phonetic-lexicon-english>C:\linguisticbits_nb\Lexicon_English.xml</phonetic-lexicon-english>        
+    <phonetic-lexicon-other>C:\linguisticbits_nb\Lexicon_Other.xml</phonetic-lexicon-other>
+  </backend>
+</configuration>
+```
+
+Setting a ZuMult configuration is done by
+- Saving an XML file like the above in a suitable place in the system
+- Specifying the path to that file in an environment variable `ZUMULT_CONFIG_PATH`
+
+The TreeTagger binary must be downloaded from https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/.
+The two TreeTagger parameter files are part of this repository: src/main/java/de/linguisticbits/workflow/tagger
+The three phonetic lexicons are also part of this repository: src/main/java/de/linguisticbits/workflow/normalizer
+
+
  
     
