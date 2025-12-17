@@ -11,6 +11,18 @@
         <maven.compiler.target>21</maven.compiler.target>
         <exec.mainClass>de.linguistibits.workflow_tgdp.Workflow_TGDP</exec.mainClass>
     </properties>
+    
+    <repositories>
+        <repository>
+          <id>github-manual</id>
+          <url>https://raw.githubusercontent.com/Exmaralda-Org/exmaralda/master/src/build/webjar/</url>
+        </repository>  
+      <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/zumult-org/zumultapi</url>
+        </repository>                  
+    </repositories>    
+    
 
     <build>
         <plugins>
