@@ -93,8 +93,8 @@ public class StatsForCOMA {
                 String transcriptID = transcriptionElement.getAttributeValue("Id");
                 count++;
                 String nsLink = transcriptionElement.getChildText("NSLink");
-                String eafFilename = nsLink.replaceAll("\\.xml", ".eaf");
-                Path resolvedPath = topLevelPath.resolve(eafFilename);
+                //String eafFilename = nsLink.replaceAll("\\.xml", ".eaf");
+                Path resolvedPath = topLevelPath.resolve(nsLink);
                 File xmlFile = resolvedPath.toFile();
                 //System.out.println("[StatsForComa] Processing " + count + " of " + transcriptions.size() + ": " + transcriptID + " / " + xmlFile.getAbsolutePath());
                 Transcript transcript = new COMATranscript(IOHelper.readDocument(xmlFile));
