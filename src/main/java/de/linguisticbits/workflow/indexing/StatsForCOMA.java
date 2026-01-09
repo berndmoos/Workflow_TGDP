@@ -13,7 +13,10 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
+import org.exmaralda.common.jdomutilities.IOUtilities;
+import org.exmaralda.partitureditor.jexmaralda.convert.StylesheetFactory;
 import org.jdom.JDOMException;
+import org.jdom.xpath.XPath;
 import org.xml.sax.SAXException;
 import org.zumult.io.FileIO;
 import org.zumult.io.IOHelper;
@@ -100,6 +103,18 @@ public class StatsForCOMA {
                 Transcript transcript = new COMATranscript(IOHelper.readDocument(xmlFile));
                 int types = transcript.getNumberOfTypes();
                 int tokens = transcript.getNumberOfTokens();
+                
+                org.jdom.Document transcriptDoc = FileIO.readDocumentFromLocalFile(xmlFile);
+                org.jdom.xpath.XPath xpath = makeXPath("//tei:annotationBlock[starts-with(@who, 'Speaker')]");
+                List l = xpath.selectNodes(transcriptDoc);
+                int speakerUtterances = l.size();
+                
+                xpath = makeXPath("//tei:annotationBlock[starts-with(@who, 'Interviewer')]");
+                l = xpath.selectNodes(transcriptDoc);
+                int interviewerUtterances = l.size();                
+                
+                String title = ((org.jdom.Element)XPath.selectSingleNode(transcriptionElement, "descendant::Key[@Name='Section Title']")).getText();
+                
                 TokenList thisTokenList = transcript.getTokenList("transcription");
                 allTokenList = allTokenList.merge(thisTokenList);
                 seTokenList = seTokenList.merge(thisTokenList);
@@ -109,6 +124,10 @@ public class StatsForCOMA {
                 transcriptElement.setAttribute("id", transcriptID);
                 transcriptElement.setAttribute("tokens", Integer.toString(tokens));
                 transcriptElement.setAttribute("types", Integer.toString(types));
+                transcriptElement.setAttribute("interviewer-utterances", Integer.toString(interviewerUtterances));
+                transcriptElement.setAttribute("speaker-utterances", Integer.toString(speakerUtterances));
+                transcriptElement.setAttribute("title", title);
+                
 
                 double duration = transcript.getEndTime() - transcript.getStartTime();
                 transcriptElement.setAttribute("duration", Double.toString(duration));                    
@@ -129,11 +148,23 @@ public class StatsForCOMA {
         
         outDocument.getRootElement().setAttribute("types", Integer.toString(allTokenList.getNumberOfTypes()));
         
+        StylesheetFactory ssf = new StylesheetFactory(true);
+        String sortedXML = ssf.applyInternalStylesheetToString("/de/linguisticbits/workflow/xsl/SortStats.xsl", IOUtilities.documentToString(outDocument));
+        outDocument = IOUtilities.readDocumentFromString(sortedXML);
+        
+        
         FileIO.writeDocumentToLocalFile(STATS_FILE, outDocument);
         
         System.out.println("[StatsForComa] Stats for " + corpusID + " calculated and written to " + STATS_FILE.getAbsolutePath());
         
         
     }
+    
+    private XPath makeXPath(String xp) throws JDOMException{
+        XPath xpath = XPath.newInstance(xp);
+        xpath.addNamespace("tei", "http://www.tei-c.org/ns/1.0");
+        return xpath;
+    }
+    
     
 }
